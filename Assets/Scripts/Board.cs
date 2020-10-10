@@ -19,22 +19,24 @@ public class Board : MonoBehaviour
     public static int range;
 
     //para verlas en el editor
-    public Coord[] coords;
+    public List<Coord> coords;
 
     public Coord[,] coordsArray;
 
-    public Vector3[,] positionsInCanvas;
+    //public Vector3[,] canvasLocations;
+
+    public Vector2[,] canvasLocations;
 
     //private Coord emptyCoord;
 
     // inicio final, [0], [length-1]
-    public Coord[] emptyWay;
+    public List<Coord> emptyWay;
 
-    private GameObject lienzo;
+    //private GameObject lienzo;
 
-    private float height;
-    private float width;
-    public float spaceBetwCoord = 0.05f;
+    //private float height;
+    //private float width;
+    //public float spaceBetwCoord = 0.05f;
    // public float spaceY;
 
     private Vector3 lienzoDims; //joo xq no salia en debug? porque era public? wtf?
@@ -42,6 +44,10 @@ public class Board : MonoBehaviour
     private Vector3 initCoordPos;
 
     private int tries = 0;
+
+
+    public Player player;
+    public Transform goal;
 
     // Use this for initialization
     void Start()
@@ -54,12 +60,13 @@ public class Board : MonoBehaviour
 
         //lienzoDims = getLienzo();
 
-        coords = new Coord[lengthW * lengthH];
+        //coords = new Coord[lengthW * lengthH];
 
-        coordsArray = new Coord[lengthW, lengthH];
+        //coordsArray = new Coord[lengthW, lengthH];
 
         //Guardar las posiciones en 3D world
-        positionsInCanvas = new Vector3[lengthW, lengthH];
+        canvasLocations = new Vector2[lengthW, lengthH];
+
 
 
         //width = lienzoDims.x / sizeX;
@@ -75,7 +82,7 @@ public class Board : MonoBehaviour
         //{
         //    for (int t = 0; t < lengthH; t++)
         //    {
-        //        positionsInCanvas[s, t] = canvasPos;
+        //        canvasLocations[s, t] = canvasPos;
 
         //        canvasPos.x = canvasPos.x + width + spaceBetwCoord;
 
@@ -89,6 +96,10 @@ public class Board : MonoBehaviour
 
         GenerateLabyrinth();
 
+        //ponga el player en la primera celda del way
+
+
+       
 
     }
 
@@ -97,43 +108,60 @@ public class Board : MonoBehaviour
     {
 
         //ser usado en el UI de memoria
-//#if UNITY_EDITOR 
-//        if (Input.GetMouseButtonDown(0))
-//#else
-//        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) 
-//#endif
-//        {
-//            Camera cam = Camera.main;
+        //#if UNITY_EDITOR 
+        //        if (Input.GetMouseButtonDown(0))
+        //#else
+        //        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) 
+        //#endif
+        //        {
+        //            Camera cam = Camera.main;
 
-//#if UNITY_EDITOR
-//            Vector3 posMouse = Input.mousePosition;
-//            Ray raycast = cam.ScreenPointToRay(posMouse);
-//#else
-//            Vector3 posTouch = Input.GetTouch(0).position;
-//            Ray raycast = cam.ScreenPointToRay(posTouch);
-//#endif
+        //#if UNITY_EDITOR
+        //            Vector3 posMouse = Input.mousePosition;
+        //            Ray raycast = cam.ScreenPointToRay(posMouse);
+        //#else
+        //            Vector3 posTouch = Input.GetTouch(0).position;
+        //            Ray raycast = cam.ScreenPointToRay(posTouch);
+        //#endif
 
-//            RaycastHit raycastHit;
+        //            RaycastHit raycastHit;
 
-//            if (Physics.Raycast(raycast, out raycastHit))
-//            {
-//                Transform objectHit = raycastHit.transform;
-//                if (objectHit.tag == "Piece")
-//                {
-//                    objectHit.SendMessage("MoveToSpace", emptyCoord);
-//                }
-//                tries++;
-//            }
-//            else
-//            {
-//                Debug.Log("RELA, nada tocado");
-//            }
+        //            if (Physics.Raycast(raycast, out raycastHit))
+        //            {
+        //                Transform objectHit = raycastHit.transform;
+        //                if (objectHit.tag == "Piece")
+        //                {
+        //                    objectHit.SendMessage("MoveToSpace", emptyCoord);
+        //                }
+        //                tries++;
+        //            }
+        //            else
+        //            {
+        //                Debug.Log("RELA, nada tocado");
+        //            }
 
-//        }
+        //        }
+
+        //ToDo interpolate for animations
+        // player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[ (int)player.pos.x, (int)player.pos.y] + new Vector2(-200, 200);
+
+        MovePlayer(player.pos);
 
 
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            Debug.Log("up");
+            
+        }
 
+    }
 
+    public void MovePlayer(Vector2 location)
+    {
+
+        player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
+
+        player.pos = location;
     }
 
     void GenerateLabyrinth()
@@ -163,9 +191,64 @@ public class Board : MonoBehaviour
             if (y == 2)
             {
                 newCoord.isEmpty = true;
+                emptyWay.Add(newCoord);
+
+                
             }
 
+
+            if (i == 9)
+            {
+                Vector2 v = go.GetComponent<RectTransform>().localPosition;
+                Debug.Log(v);
+               // player.position = v; // new Vector2(574f, -468f);
+
+                player.transform.GetComponent<RectTransform>().anchoredPosition = new Vector3(271, -161f, 0); //WO, ESE ERA
+                //player.transform.GetComponent<RectTransform>().localPosition = new Vector3(271, -161f, 0);
+
+
+                //mmmm no. a veces sale encima a veces no
+                //player.SetParent(go.transform);
+
+                //player.transform.GetComponent<RectTransform>().position = new Vector3(50f, -50, 0);
+                //player.transform.SetPositionAndRotation
+
+                //GridLayoutGroup g = transform.GetComponent<GridLayoutGroup>();
+                //Vector3Int v3  =  g.w  g.WorldToCell(go.transform.position);
+                //transform.position = g.CellToWorld(v3);
+            }
+
+            coords.Add(newCoord);
+
         }
+
+        StartCoroutine("UpdateLayoutPositions");
+        
+
+    }
+
+
+    //las posiciones de las coordennadas se demoran un poco en actualizarse
+    IEnumerator UpdateLayoutPositions ()
+    {  
+        yield return new WaitForEndOfFrame();
+    
+        foreach (Coord c in this.coords)
+        {
+            Vector2 cellPos = c.transform.GetComponent<RectTransform>().anchoredPosition;
+            Debug.Log(cellPos);
+
+            canvasLocations[(int)c.pos.x, (int)c.pos.y] = cellPos;
+
+        }
+
+        //firs locate
+        //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)emptyWay[0].pos.x, (int)emptyWay[0].pos.y] + new Vector2(-200, 200);
+
+        MovePlayer(emptyWay[0].pos);
+
+        goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)emptyWay[emptyWay.Count - 1].pos.x, (int)emptyWay[emptyWay.Count - 1].pos.y]
+                                                            + new Vector2(-200, 200);
 
     }
 
@@ -173,18 +256,18 @@ public class Board : MonoBehaviour
     void PopulatePuzzle()
     {
 
-        Coord newCoord;
+        //Coord newCoord;
 
-        int fichaImg = 1;
+        //int fichaImg = 1;
 
-        coordPrefab.transform.localScale = new Vector3(lienzoDims.x / lengthW / 10f, 0.2f, lienzoDims.y / lengthH / 10f);
+        //coordPrefab.transform.localScale = new Vector3(lienzoDims.x / lengthW / 10f, 0.2f, lienzoDims.y / lengthH / 10f);
 
 
         //for (int i = 0; i < sizeX; i++)
         //{
         //    for (int j = 0; j < lengthH; j++)
         //    {
-        //        GameObject go = Instantiate(fichaPrefab, positionsInCanvas[i, j], Quaternion.Euler(-90, 0, 0), this.transform) as GameObject;
+        //        GameObject go = Instantiate(fichaPrefab, canvasLocations[i, j], Quaternion.Euler(-90, 0, 0), this.transform) as GameObject;
 
 
         //        newCoord = go.GetComponent<Coord>();
@@ -226,7 +309,7 @@ public class Board : MonoBehaviour
     }
 
 
-    public Coord[] GetCoordsWay()
+    public List<Coord> GetCoordsWay()
     {
         return emptyWay;
     }
@@ -238,7 +321,7 @@ public class Board : MonoBehaviour
 
     public Coord GetFinalPos()
     {
-        return emptyWay[emptyWay.Length - 1];
+        return emptyWay[emptyWay.Count - 1];
     }
 
 

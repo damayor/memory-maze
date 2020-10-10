@@ -28,6 +28,14 @@ public class Player : MonoBehaviour
         
     }
 
+
+    public void Move(Direction dir )
+    {
+        Debug.Log("Go "+ dir);
+
+    }
+
+
 //    public void SetFinalPos(Vector2 v)
 //    {
 //        finalPos = v;
@@ -168,4 +176,9 @@ public class Player : MonoBehaviour
 //    {
 //        return puzzleInfo.GetEmptyFicha().transform;
 //    }
+}
+
+public enum Direction
+{
+    Up, Down, Right, Left
 }
