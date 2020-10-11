@@ -145,21 +145,45 @@ public class Board : MonoBehaviour
         //ToDo interpolate for animations
         // player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[ (int)player.pos.x, (int)player.pos.y] + new Vector2(-200, 200);
 
-        MovePlayer(player.pos);
+       //now in send message UpdatePlayerPos(player.pos);
 
-
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            Debug.Log("up");
-            
-        }
+        
 
     }
 
-    public void MovePlayer(Vector2 location)
+
+    
+    IEnumerator SwapPositions(Vector2 emptyPos) //emptyPos = Pos final
     {
 
-        player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
+        float lerp = 0;
+        float duration = 0.1f;
+
+        Vector2 initPos = player.transform.GetComponent<RectTransform>().anchoredPosition;
+
+        while (emptyPos != player.transform.GetComponent<RectTransform>().anchoredPosition)
+        {
+            lerp += Time.deltaTime / duration;
+            player.transform.GetComponent<RectTransform>().anchoredPosition = Vector2.Lerp(initPos, emptyPos, lerp);
+            yield return null;
+        }
+
+        //yield return new WaitForSeconds(0.15f);
+        Debug.Log("Sí acabo el while :P");
+
+    }
+
+    public void UpdatePlayerPos(Vector2 location)
+    {
+
+
+        Vector2 newPos = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
+
+        //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
+
+        //Animate
+        StartCoroutine("SwapPositions", newPos);
+
 
         player.pos = location;
     }
@@ -245,7 +269,7 @@ public class Board : MonoBehaviour
         //firs locate
         //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)emptyWay[0].pos.x, (int)emptyWay[0].pos.y] + new Vector2(-200, 200);
 
-        MovePlayer(emptyWay[0].pos);
+        UpdatePlayerPos(emptyWay[0].pos);
 
         goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)emptyWay[emptyWay.Count - 1].pos.x, (int)emptyWay[emptyWay.Count - 1].pos.y]
                                                             + new Vector2(-200, 200);

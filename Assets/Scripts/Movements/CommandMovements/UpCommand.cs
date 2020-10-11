@@ -28,5 +28,9 @@ public class UpCommand : MovementCommand
     //}
 
     public UpCommand() : base(delegate (Player bot) { bot.Move(Direction.Up); }, "upMove")
-    { }
+    {
+
+    }
+
+
 }

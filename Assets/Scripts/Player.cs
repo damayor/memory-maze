@@ -13,7 +13,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     //protected bool canMove;
 
-    //public Board puzzleInfo;
+
+    public Board boardRequest;
 
 
     // Start is called before the first frame update
@@ -25,15 +26,93 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        MoveUpdate();
     }
+
+
+    public void MoveUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            Debug.Log("up");
+            pos = pos + Vector2.up;
+            //SendMessage("UpdatePlayerPos", pos);
+            boardRequest.UpdatePlayerPos(pos);
+        }
+        else if (Input.GetKeyDown(KeyCode.S))
+        {
+            pos = pos + Vector2.down;
+            boardRequest.UpdatePlayerPos(pos);
+        }
+        else if (Input.GetKeyDown(KeyCode.D))
+        {
+            pos = pos + Vector2.right;
+            boardRequest.UpdatePlayerPos(pos);
+        }
+        else if (Input.GetKeyDown(KeyCode.A))
+        {
+            pos = pos + Vector2.left;
+            boardRequest.UpdatePlayerPos(pos);
+        }
+
+        ////Animate
+        //StartCoroutine("SwapPositions", empty3DLocation);
+        //SendMessage("UpdatePlayerPos", pos);
+    }
+
+
+    //My first Coroutine
+    //IEnumerator SwapPositions(Vector3 emptyPos) //emptyPos = Pos final
+    //{
+
+    //    float lerp = 0;
+    //    float duration = 0.1f;
+
+    //    Vector3 myPos = transform.position;
+
+    //    while (emptyPos != transform.position)
+    //    {
+    //        lerp += Time.deltaTime / duration;
+    //        transform.position = Vector3.Lerp(myPos, emptyPos /* espacio.transform.position*/, lerp);
+    //        yield return null;
+    //    }
+
+    //    //yield return new WaitForSeconds(0.15f);
+    //    Debug.Log("Sí acabo el while :P");
+
+    //}
 
 
     public void Move(Direction dir )
     {
         Debug.Log("Go "+ dir);
 
+        switch (dir)
+        {
+            //to confirm si: vector.down si lo baja en mi arreglo de pos, 
+            case Direction.Down:
+                pos = pos + Vector2.down;
+                break;
+            case Direction.Up:
+                pos = pos + Vector2.up;
+                break;
+            case Direction.Left:
+                pos = pos + Vector2.left;
+                break;
+            case Direction.Right:
+                pos = pos + Vector2.right;
+                break;
+        }
+
     }
+
+    //solo actualiza la position en el laberinto, no en el espacio
+    //public void setPosition(Vector2 nPos)
+    //{
+    //    pos = pos + nPos;
+
+        
+    //}
 
 
 //    public void SetFinalPos(Vector2 v)

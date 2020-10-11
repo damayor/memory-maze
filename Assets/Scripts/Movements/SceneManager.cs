@@ -16,6 +16,13 @@ public class SceneManager : MonoBehaviour
     private List<MovementCommand> commands = new List<MovementCommand>();
     private Coroutine executeRoutine;
 
+    [Header("Commands Panel")]
+    [SerializeField]
+    private Transform commandsGizmosPanel;
+
+    [SerializeField]
+    private GameObject commandGizmoPrefab;
+
     
     void Start()
     {
@@ -42,9 +49,9 @@ public class SceneManager : MonoBehaviour
     {
         var botCommand = InputHandler.HandleInputt();
         if (botCommand != null /*&& executeRoutine == null*/)
-       {
+        {
             AddToCommands(botCommand);
-       }
+        }
     }
 
 
@@ -55,6 +62,30 @@ public class SceneManager : MonoBehaviour
         //5
         //uiManager.InsertNewText(botCommand.ToString()); //ToDo
         Debug.Log("Add " + botCommand.ToString());
+
+        GameObject arrow = Instantiate(commandGizmoPrefab) as GameObject;
+
+        //SendMessage("drawArrow", Direction.Up);
+        switch (botCommand.ToString())
+        {
+            //to confirm si: vector.down si lo baja en mi arreglo de pos, 
+            case "upMove":
+                //pos = pos + Vector2.down;
+                arrow.GetComponent<RectTransform>().Rotate(new Vector3(0, 0, 90));
+                //arrow.transform.SetParent(commandsGizmosPanel);
+                break;
+            case "moveDown":
+                arrow.GetComponent<RectTransform>().Rotate(new Vector3(0, 0, -90));
+                break;
+            case "moveLeft":
+                arrow.GetComponent<RectTransform>().Rotate(new Vector3(0, 0, 180));
+                //arrow.transform.SetParent(commandsGizmosPanel);
+                break;
+            case "moveRight":
+                //arrow.transform.SetParent(commandsGizmosPanel);
+                break;
+        }
+        arrow.transform.SetParent(commandsGizmosPanel);
     }
 
 
