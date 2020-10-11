@@ -30,7 +30,7 @@ public class Board : MonoBehaviour
     //private Coord emptyCoord;
 
     // inicio final, [0], [length-1]
-    public List<Coord> emptyWay;
+    public List<Coord> wayToWalk;
 
     //private GameObject lienzo;
 
@@ -49,12 +49,15 @@ public class Board : MonoBehaviour
     public Player player;
     public Transform goal;
 
+    public Material matStone;
+    public Material matWay;
+
     // Use this for initialization
     void Start()
     {
 
-        lengthW = 4;
-        lengthH = 4;
+        lengthW = ToolboxStaticData.rangeXMaze;
+        lengthH = ToolboxStaticData.rangeYMaze;
 
         range = lengthW * lengthH;
 
@@ -153,7 +156,7 @@ public class Board : MonoBehaviour
 
 
     
-    IEnumerator SwapPositions(Vector2 emptyPos) //emptyPos = Pos final
+    IEnumerator SwapPositions(Vector2 nextPos) //emptyPos = Pos final
     {
 
         float lerp = 0;
@@ -161,10 +164,10 @@ public class Board : MonoBehaviour
 
         Vector2 initPos = player.transform.GetComponent<RectTransform>().anchoredPosition;
 
-        while (emptyPos != player.transform.GetComponent<RectTransform>().anchoredPosition)
+        while (nextPos != player.transform.GetComponent<RectTransform>().anchoredPosition)
         {
             lerp += Time.deltaTime / duration;
-            player.transform.GetComponent<RectTransform>().anchoredPosition = Vector2.Lerp(initPos, emptyPos, lerp);
+            player.transform.GetComponent<RectTransform>().anchoredPosition = Vector2.Lerp(initPos, nextPos, lerp);
             yield return null;
         }
 
@@ -215,19 +218,26 @@ public class Board : MonoBehaviour
             if (y == 2)
             {
                 newCoord.isEmpty = true;
-                emptyWay.Add(newCoord);
+                wayToWalk.Add(newCoord);
+                //newCoord.SetMaterial(matWay);
 
-                
+
+                //Add to Way
+               // ToolboxStaticData.AddCoordWay(newCoord);
+            }
+            else {
+                //newCoord.SetMaterial(matStone);
             }
 
+            ToolboxStaticData.SetCoordsWay(wayToWalk);
 
             if (i == 9)
             {
-                Vector2 v = go.GetComponent<RectTransform>().localPosition;
-                Debug.Log(v);
+                //Vector2 v = go.GetComponent<RectTransform>().localPosition;
+                //Debug.Log(v);
                // player.position = v; // new Vector2(574f, -468f);
 
-                player.transform.GetComponent<RectTransform>().anchoredPosition = new Vector3(271, -161f, 0); //WO, ESE ERA
+                //player.transform.GetComponent<RectTransform>().anchoredPosition = new Vector3(271, -161f, 0); //WO, ESE ERA
                 //player.transform.GetComponent<RectTransform>().localPosition = new Vector3(271, -161f, 0);
 
 
@@ -267,11 +277,11 @@ public class Board : MonoBehaviour
         }
 
         //firs locate
-        //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)emptyWay[0].pos.x, (int)emptyWay[0].pos.y] + new Vector2(-200, 200);
+        //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)wayToWalk[0].pos.x, (int)wayToWalk[0].pos.y] + new Vector2(-200, 200);
 
-        UpdatePlayerPos(emptyWay[0].pos);
+        UpdatePlayerPos(wayToWalk[0].pos);
 
-        goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)emptyWay[emptyWay.Count - 1].pos.x, (int)emptyWay[emptyWay.Count - 1].pos.y]
+        goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)wayToWalk[wayToWalk.Count - 1].pos.x, (int)wayToWalk[wayToWalk.Count - 1].pos.y]
                                                             + new Vector2(-200, 200);
 
     }
@@ -335,17 +345,17 @@ public class Board : MonoBehaviour
 
     public List<Coord> GetCoordsWay()
     {
-        return emptyWay;
+        return wayToWalk;
     }
 
     public Coord GetStartPos()
     {
-        return emptyWay[0];
+        return wayToWalk[0];
     }
 
     public Coord GetFinalPos()
     {
-        return emptyWay[emptyWay.Count - 1];
+        return wayToWalk[wayToWalk.Count - 1];
     }
 
 

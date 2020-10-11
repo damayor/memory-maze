@@ -34,25 +34,36 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.W))
         {
-            Debug.Log("up");
-            pos = pos + Vector2.up;
-            //SendMessage("UpdatePlayerPos", pos);
-            boardRequest.UpdatePlayerPos(pos);
+            if (pos.y < ToolboxStaticData.rangeYMaze - 1)
+            {
+                Debug.Log("up");
+                pos = pos + Vector2.up;
+                boardRequest.UpdatePlayerPos(pos);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.S))
         {
-            pos = pos + Vector2.down;
-            boardRequest.UpdatePlayerPos(pos);
+            if (pos.y > 0)
+            { 
+                pos = pos + Vector2.down ;
+                boardRequest.UpdatePlayerPos(pos);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.D))
         {
-            pos = pos + Vector2.right;
-            boardRequest.UpdatePlayerPos(pos);
+            if (pos.x < ToolboxStaticData.rangeXMaze - 1)
+            {
+                pos = pos + Vector2.right;
+                boardRequest.UpdatePlayerPos(pos);
+            }
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
-            pos = pos + Vector2.left;
-            boardRequest.UpdatePlayerPos(pos);
+            if (pos.x > 0)
+            {
+                pos = pos + Vector2.left;
+                boardRequest.UpdatePlayerPos(pos);
+            }
         }
 
         ////Animate
@@ -61,35 +72,14 @@ public class Player : MonoBehaviour
     }
 
 
-    //My first Coroutine
-    //IEnumerator SwapPositions(Vector3 emptyPos) //emptyPos = Pos final
-    //{
-
-    //    float lerp = 0;
-    //    float duration = 0.1f;
-
-    //    Vector3 myPos = transform.position;
-
-    //    while (emptyPos != transform.position)
-    //    {
-    //        lerp += Time.deltaTime / duration;
-    //        transform.position = Vector3.Lerp(myPos, emptyPos /* espacio.transform.position*/, lerp);
-    //        yield return null;
-    //    }
-
-    //    //yield return new WaitForSeconds(0.15f);
-    //    Debug.Log("Sí acabo el while :P");
-
-    //}
-
-
     public void Move(Direction dir )
     {
         Debug.Log("Go "+ dir);
 
         switch (dir)
         {
-            //to confirm si: vector.down si lo baja en mi arreglo de pos, 
+            //to confirm si: vector.down si lo baja en mi arreglo de pos, si
+            // ojo porque si no lo deja andar estando fuera del arreglo, pero lo deja en la misma pos, no nota que perdip
             case Direction.Down:
                 pos = pos + Vector2.down;
                 break;
@@ -103,6 +93,13 @@ public class Player : MonoBehaviour
                 pos = pos + Vector2.right;
                 break;
         }
+
+        boardRequest.UpdatePlayerPos(pos);
+
+    }
+
+    public void playerReset()
+    {
 
     }
 

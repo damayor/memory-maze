@@ -1,20 +1,25 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+
 using UnityEngine;
+using UnityEngine.UI;
 
-
-/*With the suppoert of Razeware LLC */
 public class SceneManager : MonoBehaviour
 {
+    /*With the suppoert of Razeware LLC */
     [Header("Set In Inspector")]
     [SerializeField]
-    private Player bot = null;
+    private Player player = null;
 
     [SerializeField]
     //private UIManager uiManager = null;
 
     private List<MovementCommand> commands = new List<MovementCommand>();
     private Coroutine executeRoutine;
+
+
 
     [Header("Commands Panel")]
     [SerializeField]
@@ -23,10 +28,26 @@ public class SceneManager : MonoBehaviour
     [SerializeField]
     private GameObject commandGizmoPrefab;
 
-    
+    [Header("Memorize Countdown")]
+    public float timeRemaining ;
+    public bool timerIsRunning = false;
+    public Text timerLabel ;
+
+    public LevelManager levelM;
+
+    private bool hasWon = false;
+
     void Start()
     {
-        
+        timeRemaining = ToolboxStaticData.memorizeTime;
+
+        timerIsRunning = true;
+
+        levelM = GetComponent<LevelManager>();
+
+
+        levelM.OnWin += HandleWin;
+        levelM.OnWin += HandleLost;
     }
 
     //2
@@ -37,36 +58,41 @@ public class SceneManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             ExecuteCommands();
+            commandsGizmosPanel.parent.parent.parent.gameObject.SetActive(false);
         }
         else
         {
             CheckForMovementCommands();
         }
+
+        CheckMemorizeTimer();
+       
     }
+
 
     //3
     private void CheckForMovementCommands()
     {
-        var botCommand = InputHandler.HandleInputt();
-        if (botCommand != null /*&& executeRoutine == null*/)
+        var playerCommand = InputHandler.HandleInputt();
+        if (playerCommand != null /*&& executeRoutine == null*/)
         {
-            AddToCommands(botCommand);
+            AddToCommands(playerCommand);
         }
     }
 
 
     //4
-    private void AddToCommands(MovementCommand botCommand)
+    private void AddToCommands(MovementCommand playerCommand)
     {
-        commands.Add(botCommand);
+        commands.Add(playerCommand);
         //5
-        //uiManager.InsertNewText(botCommand.ToString()); //ToDo
-        Debug.Log("Add " + botCommand.ToString());
+        //uiManager.InsertNewText(playerCommand.ToString()); //ToDo
+        Debug.Log("Add " + playerCommand.ToString());
 
         GameObject arrow = Instantiate(commandGizmoPrefab) as GameObject;
 
         //SendMessage("drawArrow", Direction.Up);
-        switch (botCommand.ToString())
+        switch (playerCommand.ToString())
         {
             //to confirm si: vector.down si lo baja en mi arreglo de pos, 
             case "upMove":
@@ -111,7 +137,22 @@ public class SceneManager : MonoBehaviour
         for (int i = 0, count = commands.Count; i < count; i++)
         {
             var command = commands[i];
-            command.Execute(bot); //yeeea
+            command.Execute(player); //yeeea
+
+            //desde aca ya esta la posicion actualizada? Sip
+            if (player.pos != ToolboxStaticData.way[i + 1].pos)
+            {
+                HandleLost();
+                break;
+            }
+
+            if (player.pos == ToolboxStaticData.way[ToolboxStaticData.way.Count - 1].pos)
+            {
+                //Debug.Log("GANASTES!");
+                HandleWin();
+            }
+
+
             //9
             //uiManager.RemoveFirstTextLine();
             yield return new WaitForSeconds(0.5f);
@@ -120,8 +161,54 @@ public class SceneManager : MonoBehaviour
         //10
         commands.Clear();
 
-        //bot.ResetToLastCheckpoint();
+        //player.ResetToLastCheckpoint();
 
         executeRoutine = null;
+    }
+
+    private void CheckMemorizeTimer()
+    {
+        if (timerIsRunning)
+        {
+            if (timeRemaining > 0)
+            {
+                timeRemaining -= Time.deltaTime;
+
+                if (timeRemaining < 5)
+                {
+                    timerLabel.GetComponent<Text>().text = timeRemaining.ToString("0");
+                }
+            }
+            else
+            {
+                Debug.Log("Time has run out! Try it!");
+                timeRemaining = 0;
+                timerIsRunning = false;
+
+                commandsGizmosPanel.parent.parent.parent.gameObject.SetActive(true);
+                timerLabel.GetComponent<Text>().text = "";
+            }
+        }
+    }
+
+    /*suscription to LevelManager events*/
+    public void HandleWin()
+    {
+        hasWon = true;
+        Debug.Log("Event GANASTE!");
+    }
+
+    public void HandleLost()
+    {
+        hasWon = true;
+        Debug.Log("Event Perdiste!");
+    }
+
+
+    public void TryAgain()
+    {
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 }

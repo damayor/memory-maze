@@ -21,7 +21,6 @@ public class Coord : MonoBehaviour {
     //private bool isTap;
 
     public bool isEmpty = false;
-
     
 
     //public Board puzzleInfo;
@@ -38,11 +37,12 @@ public class Coord : MonoBehaviour {
 
         if (isEmpty)
         {
-            GetComponent<RawImage>().color = Color.white; 
+            GetComponent<RawImage>().color = Color.white;
+            //GetComponent<RawImage>().material = Resources.Load("/Materials/grass_2", typeof(Material)) as Material;
         }
         else
         {
-            GetComponent<RawImage>().color = Color.black;
+            GetComponent<RawImage>().color = new Color(0.27f, 0.24f, 0.15f);
         }
     }
 
@@ -52,133 +52,24 @@ public class Coord : MonoBehaviour {
 
     }
 
-    public bool IsEmptySpace()
+
+    public void SetMaterial(Material mat)
     {
-        return isEmpty;
+        GetComponent<RawImage>().material = mat;
     }
 
-    public void SetAsEmpty(bool b)
-    {
-        isEmpty = b;
-    }
-
-    //public void SetFinalPos(Vector2 v)
-    //{
-    //    finalPos = v;
-    //}
-
-    //public Vector2 GetFinalPos()
-    //{
-    //    return finalPos;
-    //}
-
-    //public void SetPos(Vector2 v)
-    //{
-    //    pos = v;
-    //}
-
-    //public Vector2 GetPos()
-    //{
-    //    return pos;
-    //}
-
-    ////Se puede mover porque tiene el espacio al lado
-    //public bool CanIMove(Coord espacio)
-    //{
-
-    //    if (espacio.pos.y == pos.y
-    //            && Mathf.Abs(pos.x - espacio.pos.x) == 1)
-    //    {
-    //        canMove = true;
-    //    }
-    //    else if (espacio.pos.x == pos.x
-    //            && Mathf.Abs(pos.y - espacio.pos.y) == 1)
-    //    {
-    //        canMove = true;
-    //    }
-    //    else
-    //    {
-    //        canMove = false;
-    //    };
-
-    //    return canMove;
-
-    //}
 
 
-    //public void MoveToSpace(Coord espacio)
-    //{
-
-    //    //Coord espacio = puzzleInfo.GetEmptyCoord();
-
-    //    if (CanIMove(espacio))
-    //    {
-    //        Vector2 spacePos = espacio.pos;
-    //        espacio.pos = pos;
-    //        pos = spacePos;
-
-    //        //y lo mismo con XYZ location
-    //        Vector3 empty3DLocation = espacio.transform.position;
-    //        Vector3 my3DLocation = transform.position;
-
-    //        //Animate
-    //        StartCoroutine("SwapPositions", empty3DLocation);
 
 
-    //        espacio.transform.position = my3DLocation; //no cambiaba!! R: por ser parte de un prefab instanceado
 
-    //        puzzleInfo.CheckWonAfterMove();
-    //    }
-
-    //}
 
     //public void SetTap()
     //{
     //    isTap = true;
     //}
 
-    //public bool CheckLocated()
-    //{
-    //    if (pos == finalPos)
-    //    {
-    //        isLocated = true;
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        return false;
-    //    }
-    //}
-
-    //public void SetLocated(bool b)
-    //{
-    //    isLocated = b;
-    //}
-
-    //public void MoveButton(Coord espacio)
-    //{
-    //    Vector2 spacePos = espacio.pos;
-    //    espacio.pos = pos;
-    //    pos = spacePos;
-
-    //    //y lo mismo con XYZ location
-    //    Vector2 empty3DLocation = espacio.GetComponent<RectTransform>().anchoredPosition;
-    //    Vector2 my3DLocation = GetComponent<RectTransform>().anchoredPosition;
-
-    //    GetComponent<RectTransform>().anchoredPosition = empty3DLocation; //yeahh
-    //                                                                      //no cambia!!
-    //    espacio.ChangePos(new Vector2(300, 100)); //nada...
-
-    //    //Puzzle.CheckMovables, CheckIfPuzzleDone
-
-    //    Debug.Log("Movido el " + GetComponentInChildren<Text>().text + " al espacio " + my3DLocation);
-    //}
-
-    //public Transform SetEmptyPos()
-    //{
-    //    return puzzleInfo.GetEmptyCoord().transform;
-    //}
-
+    
     
 
 
