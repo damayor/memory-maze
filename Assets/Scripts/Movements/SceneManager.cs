@@ -24,6 +24,8 @@ public class SceneManager : MonoBehaviour
     [Header("Commands Panel")]
     [SerializeField]
     private Transform commandsGizmosPanel;
+    [SerializeField]
+    private Transform lostPanel;
 
     [SerializeField]
     private GameObject commandGizmoPrefab;
@@ -43,7 +45,7 @@ public class SceneManager : MonoBehaviour
 
         timerIsRunning = true;
 
-        levelM = GetComponent<LevelManager>();
+        //levelM = GetComponent<LevelManager>();
 
 
         levelM.OnWin += HandleWin;
@@ -74,7 +76,7 @@ public class SceneManager : MonoBehaviour
     private void CheckForMovementCommands()
     {
         var playerCommand = InputHandler.HandleInputt();
-        if (playerCommand != null /*&& executeRoutine == null*/)
+        if (playerCommand != null && executeRoutine == null)
         {
             AddToCommands(playerCommand);
         }
@@ -140,11 +142,26 @@ public class SceneManager : MonoBehaviour
             command.Execute(player); //yeeea
 
             //desde aca ya esta la posicion actualizada? Sip
-            if (player.pos != ToolboxStaticData.way[i + 1].pos)
+            //check win distint with undo 
+            if ( !  ToolboxStaticData.GetObstacled() )
             {
-                HandleLost();
-                break;
+                if (player.pos != ToolboxStaticData.way[i + 1].pos)
+                {
+                    HandleLost();
+                    break;
+                }
+
             }
+            else
+            {
+                if (player.pos != ToolboxStaticData.way[ i ].pos)
+                {
+                    HandleLost();
+                    break;
+                }
+
+            }
+
 
             if (player.pos == ToolboxStaticData.way[ToolboxStaticData.way.Count - 1].pos)
             {
@@ -160,6 +177,10 @@ public class SceneManager : MonoBehaviour
 
         //10
         commands.Clear();
+        foreach (Transform child in commandsGizmosPanel)
+        {
+            Destroy(child.gameObject);
+        }
 
         //player.ResetToLastCheckpoint();
 
@@ -202,8 +223,23 @@ public class SceneManager : MonoBehaviour
     {
         hasWon = true;
         Debug.Log("Event Perdiste!");
+        lostPanel.gameObject.SetActive(true);
     }
 
+    public void CleanCommands()
+    {
+        
+        commands.Clear(); //ojo xq no vuelve a ejecutar
+
+        //commands = new List<MovementCommand>();
+        
+        foreach (Transform child in commandsGizmosPanel)
+        {
+            Destroy(child.gameObject);
+        }
+        Debug.Log("All moves cleaned");
+
+    }
 
     public void TryAgain()
     {

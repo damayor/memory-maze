@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-
-
+    
     //Pos actual en el puzzle
     public Vector2 pos;
 
@@ -15,6 +14,8 @@ public class Player : MonoBehaviour
 
 
     public Board boardRequest;
+
+    public Vector2 previousPos;
 
 
     // Start is called before the first frame update
@@ -32,11 +33,13 @@ public class Player : MonoBehaviour
 
     public void MoveUpdate()
     {
+
         if (Input.GetKeyDown(KeyCode.W))
         {
             if (pos.y < ToolboxStaticData.rangeYMaze - 1)
             {
                 Debug.Log("up");
+                previousPos = pos;
                 pos = pos + Vector2.up;
                 boardRequest.UpdatePlayerPos(pos);
             }
@@ -44,7 +47,8 @@ public class Player : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.S))
         {
             if (pos.y > 0)
-            { 
+            {
+                previousPos = pos;
                 pos = pos + Vector2.down ;
                 boardRequest.UpdatePlayerPos(pos);
             }
@@ -53,6 +57,7 @@ public class Player : MonoBehaviour
         {
             if (pos.x < ToolboxStaticData.rangeXMaze - 1)
             {
+                previousPos = pos;
                 pos = pos + Vector2.right;
                 boardRequest.UpdatePlayerPos(pos);
             }
@@ -61,36 +66,61 @@ public class Player : MonoBehaviour
         {
             if (pos.x > 0)
             {
+                previousPos = pos;
                 pos = pos + Vector2.left;
                 boardRequest.UpdatePlayerPos(pos);
             }
         }
+        else if (Input.GetKeyDown(KeyCode.Z))
+        {
+            MoveUndo();
+
+        }
 
         ////Animate
-        //StartCoroutine("SwapPositions", empty3DLocation);
+        //StartCoroutine("AnimPosition", empty3DLocation);
         //SendMessage("UpdatePlayerPos", pos);
     }
+
+
+    public void MoveUndo()
+    {
+        var lastPos = pos;
+        pos = previousPos;
+        previousPos = lastPos;
+        boardRequest.UpdatePlayerPos(pos);
+
+    }
+
 
 
     public void Move(Direction dir )
     {
         Debug.Log("Go "+ dir);
+        
 
         switch (dir)
         {
             //to confirm si: vector.down si lo baja en mi arreglo de pos, si
             // ojo porque si no lo deja andar estando fuera del arreglo, pero lo deja en la misma pos, no nota que perdip
             case Direction.Down:
+                previousPos = pos;
                 pos = pos + Vector2.down;
                 break;
             case Direction.Up:
+                previousPos = pos;
                 pos = pos + Vector2.up;
                 break;
             case Direction.Left:
+                previousPos = pos;
                 pos = pos + Vector2.left;
                 break;
             case Direction.Right:
+                previousPos = pos;
                 pos = pos + Vector2.right;
+                break;
+            case Direction.Undo:
+                pos = previousPos;
                 break;
         }
 
@@ -172,7 +202,7 @@ public class Player : MonoBehaviour
 //            Vector3 my3DLocation = transform.position;
 
 //            //Animate
-//            StartCoroutine("SwapPositions", empty3DLocation);
+//            StartCoroutine("AnimPosition", empty3DLocation);
 
 
 //            espacio.transform.position = my3DLocation; //no cambiaba!! R: por ser parte de un prefab instanceado
@@ -206,7 +236,7 @@ public class Player : MonoBehaviour
 //    }
 
 //    //My first Coroutine
-//    IEnumerator SwapPositions(Vector3 emptyPos)
+//    IEnumerator AnimPosition(Vector3 emptyPos)
 //    {
 
 //        float lerp = 0;
@@ -256,5 +286,5 @@ public class Player : MonoBehaviour
 
 public enum Direction
 {
-    Up, Down, Right, Left
+    Up, Down, Right, Left, Undo
 }

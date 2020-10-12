@@ -1,0 +1,11 @@
+{
+  "Name": "Config",
+  "mazeW": 4,
+  "mazeH": 4,
+  "defaultXYZOrientationRange": [ -50, 40, -5, 24, -40, 30 ],
+  
+  "wayCoordsX": [ 0, 1, 2, 2 ],
+  "wayCoordsY": [ 2, 2 ,2, 3 ],
+
+  "indexObstacle": 2
+}

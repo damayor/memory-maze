@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-
+using System.IO;
 
 /**
  ** Damayor- Tablero que representa un laberinto para ser memorizado
@@ -11,8 +11,7 @@ using UnityEngine.SceneManagement;
 public class Board : MonoBehaviour
 {
     public GameObject coordPrefab;
-    private bool won;
-
+    
     public static int lengthW;
     public static int lengthH;
 
@@ -32,12 +31,7 @@ public class Board : MonoBehaviour
     // inicio final, [0], [length-1]
     public List<Coord> wayToWalk;
 
-    //private GameObject lienzo;
 
-    //private float height;
-    //private float width;
-    //public float spaceBetwCoord = 0.05f;
-   // public float spaceY;
 
     private Vector3 lienzoDims; //joo xq no salia en debug? porque era public? wtf?
 
@@ -48,11 +42,46 @@ public class Board : MonoBehaviour
 
     public Player player;
     public Transform goal;
+    public Transform obstacle;
+
+
 
     public Material matStone;
     public Material matWay;
 
-    // Use this for initialization
+    private static readonly MovementCommand MoveUndo = new UndoCommand();
+    private bool obsDone = false;
+
+    public static ConfigJSON configData;
+
+    
+    
+
+    // Inicialization of Config Data
+    private void Awake()
+    {
+        string path = /*Application.dataPath +*/ "config.json"; //para que quede en la misma jerarquia del ejecutable
+
+        string jsonString = File.ReadAllText(path);
+
+        configData = JsonUtility.FromJson<ConfigJSON>(jsonString);
+
+        Debug.Log("Datos de configuración cargados");
+
+        
+        for (int i = 0; i < configData.wayCoordsX.Length; i++)
+        {
+            Coord cW = new Coord();
+            cW.pos = new Vector2(configData.wayCoordsX[i], configData.wayCoordsY[i]);
+            wayToWalk.Add(cW);
+
+        }
+
+        ToolboxStaticData.SetCoordsWay(wayToWalk);
+        ToolboxStaticData.rangeXMaze = configData.mazeW;
+        ToolboxStaticData.rangeYMaze = configData.mazeH;
+    }
+
     void Start()
     {
 
@@ -110,53 +139,31 @@ public class Board : MonoBehaviour
     void Update()
     {
 
-        //ser usado en el UI de memoria
-        //#if UNITY_EDITOR 
-        //        if (Input.GetMouseButtonDown(0))
-        //#else
-        //        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began) 
-        //#endif
-        //        {
-        //            Camera cam = Camera.main;
+     
+       
 
-        //#if UNITY_EDITOR
-        //            Vector3 posMouse = Input.mousePosition;
-        //            Ray raycast = cam.ScreenPointToRay(posMouse);
-        //#else
-        //            Vector3 posTouch = Input.GetTouch(0).position;
-        //            Ray raycast = cam.ScreenPointToRay(posTouch);
-        //#endif
-
-        //            RaycastHit raycastHit;
-
-        //            if (Physics.Raycast(raycast, out raycastHit))
-        //            {
-        //                Transform objectHit = raycastHit.transform;
-        //                if (objectHit.tag == "Piece")
-        //                {
-        //                    objectHit.SendMessage("MoveToSpace", emptyCoord);
-        //                }
-        //                tries++;
-        //            }
-        //            else
-        //            {
-        //                Debug.Log("RELA, nada tocado");
-        //            }
-
-        //        }
-
-        //ToDo interpolate for animations
-        // player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[ (int)player.pos.x, (int)player.pos.y] + new Vector2(-200, 200);
-
-       //now in send message UpdatePlayerPos(player.pos);
-
-        
 
     }
 
+    void CheckObstacle()
+    {
+        if (player.pos == obstacle.GetComponent<Coord>().pos )
+        {
 
+            Debug.Log("llegó al obstaculo!");
+
+            player.Move(Direction.Undo);
+            //player.MoveUndo();
+            obsDone = true;
+            ToolboxStaticData.SetObstacled(true);
+
+            //ToDo desaparece sprite moon
+            obstacle.GetComponent<RawImage>().enabled = false;
+
+        }
+    }
     
-    IEnumerator SwapPositions(Vector2 nextPos) //emptyPos = Pos final
+    IEnumerator AnimPosition(Vector2 nextPos) //emptyPos = Pos final
     {
 
         float lerp = 0;
@@ -171,8 +178,11 @@ public class Board : MonoBehaviour
             yield return null;
         }
 
-        //yield return new WaitForSeconds(0.15f);
-        Debug.Log("Sí acabo el while :P");
+
+        if (!obsDone)
+        {
+            CheckObstacle();
+        }
 
     }
 
@@ -185,10 +195,10 @@ public class Board : MonoBehaviour
         //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
 
         //Animate
-        StartCoroutine("SwapPositions", newPos);
+        StartCoroutine("AnimPosition", newPos);
 
 
-        player.pos = location;
+        player.pos = location; //esto pa que?
     }
 
     void GenerateLabyrinth()
@@ -199,60 +209,87 @@ public class Board : MonoBehaviour
 
         //coordPrefab.transform.localScale = new Vector3(lienzoDims.x / sizeX / 10f, 0.2f, lienzoDims.y / lengthH / 10f);
 
-        
-               
-        for (int i = 0; i < lengthW*lengthW; i++)
+
+
+        for (int i = 0; i < lengthW * lengthW; i++)
         {
             GameObject go = Instantiate(coordPrefab, this.transform) as GameObject;
 
             newCoord = go.GetComponent<Coord>();
 
-            
+
 
             //ToDebug
-            int x = (i % lengthW); 
+            int x = (i % lengthW);
             int y = (i / lengthW);
 
             newCoord.pos = new Vector2(x, y);
 
-            if (y == 2)
+
+            //
+            if (wayToWalk.Contains(newCoord))
             {
+                Debug.Log("se le encontro desde el json" + newCoord.pos);
+
+                //  wayToWalk.
+
                 newCoord.isEmpty = true;
-                wayToWalk.Add(newCoord);
-                //newCoord.SetMaterial(matWay);
-
-
-                //Add to Way
-               // ToolboxStaticData.AddCoordWay(newCoord);
-            }
-            else {
-                //newCoord.SetMaterial(matStone);
+                //wayToWalk.Add(newCoord);
             }
 
-            ToolboxStaticData.SetCoordsWay(wayToWalk);
 
-            if (i == 9)
+            //foreach (Coord c in wayToWalk)
+            //{
+            //    if (c.Equals(newCoord))
+            //    {
+            //        newCoord.isEmpty = true;
+            //        Debug.Log("se le encontro desde el json" + newCoord.pos);
+            //        break;
+            //    }
+            //}
+
+            //wayToWalk.ForEach(c =>
+            //{
+            //    if (c.Equals(newCoord))
+            //    {
+            //        newCoord.isEmpty = true;
+            //        break;
+            //    }
+            //});
+
+
+            //ToDevelop: way from Resources file or generated random
+            //if (y == 2)
+            //{
+            //    newCoord.isEmpty = true;
+            //    wayToWalk.Add(newCoord);
+            //    //newCoord.SetMaterial(matWay);
+
+
+            //    //Add osbtacle
+            //    if (x == 2)
+            //    {
+            //        Coord obsC = obstacle.GetComponent<Coord>();
+            //        obsC.SetMazePosition(new Vector2(x, y));
+            //        ToolboxStaticData.SetObstaclePosition(obsC);
+            //    }
+
+            //}
+            //else {
+            //    //newCoord.SetMaterial(matStone);
+            //}
+
+            //Locate Obstacle
+            if (wayToWalk[configData.indexObstacle].Equals(newCoord))
             {
-                //Vector2 v = go.GetComponent<RectTransform>().localPosition;
-                //Debug.Log(v);
-               // player.position = v; // new Vector2(574f, -468f);
-
-                //player.transform.GetComponent<RectTransform>().anchoredPosition = new Vector3(271, -161f, 0); //WO, ESE ERA
-                //player.transform.GetComponent<RectTransform>().localPosition = new Vector3(271, -161f, 0);
-
-
-                //mmmm no. a veces sale encima a veces no
-                //player.SetParent(go.transform);
-
-                //player.transform.GetComponent<RectTransform>().position = new Vector3(50f, -50, 0);
-                //player.transform.SetPositionAndRotation
-
-                //GridLayoutGroup g = transform.GetComponent<GridLayoutGroup>();
-                //Vector3Int v3  =  g.w  g.WorldToCell(go.transform.position);
-                //transform.position = g.CellToWorld(v3);
+                Coord obsC = obstacle.GetComponent<Coord>();
+                obsC.SetMazePosition(new Vector2(x, y));
+                ToolboxStaticData.SetObstaclePosition(obsC);
             }
+            
 
             coords.Add(newCoord);
+            ToolboxStaticData.SetCoordsWay(wayToWalk);
 
         }
 
@@ -262,7 +299,7 @@ public class Board : MonoBehaviour
     }
 
 
-    //las posiciones de las coordennadas se demoran un poco en actualizarse
+    //las posiciones de las coordennadas dentro de un LayoutGroup se demoran un poco en actualizarse
     IEnumerator UpdateLayoutPositions ()
     {  
         yield return new WaitForEndOfFrame();
@@ -281,9 +318,13 @@ public class Board : MonoBehaviour
 
         UpdatePlayerPos(wayToWalk[0].pos);
 
-        goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)wayToWalk[wayToWalk.Count - 1].pos.x, (int)wayToWalk[wayToWalk.Count - 1].pos.y]
+        goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)wayToWalk[wayToWalk.Count - 1].pos.x, 
+                                                                                (int)wayToWalk[wayToWalk.Count - 1].pos.y]
                                                             + new Vector2(-200, 200);
 
+        obstacle.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int) obstacle.GetComponent<Coord>().pos.x,
+                                                                                  (int) obstacle.GetComponent<Coord>().pos.y ]
+                                                            + new Vector2(-200, 200);
     }
 
     //Genera el puzzle y asigna las variables de las coords
@@ -359,17 +400,22 @@ public class Board : MonoBehaviour
     }
 
 
-    //public void OnDrawGizmos()
-    //{
-    //    GameObject lienz = transform.Find("Lienzo").gameObject;
+}
 
-    //    Bounds bs = lienz.GetComponent<MeshRenderer>().bounds;
-    //    Vector3 c = bs.center;
+// Clase de Configuración vista en el editor de Unity en el Script Json Config
+[System.Serializable]
+public class ConfigJSON
+{
+    public string Name;
 
-    //    Gizmos.color = Color.yellow;
-    //    Gizmos.DrawWireCube(c, bs.size);
+    public int mazeW;
+    public int mazeH;
 
-    //    Debug.Log(bs.size);
-    //}
+    public float[] defaultXYZOrientationRange;
+    public int[] wayCoordsX;
+    public int[] wayCoordsY;
+    public int indexObstacle;
+
+
 }
 

@@ -26,9 +26,9 @@ public static class InputHandler
         //new MovementCommand(delegate (Player bot) { bot.Move(Direction.Right); }, "moveRight");
         new RightCommand();
 
-    //5
-    //private static readonly MovementCommand Shoot =
-    //    new MovementCommand(delegate (Player bot) { bot.Shoot(); }, "shoot");
+    private static readonly MovementCommand MoveUndo =
+    //new MovementCommand(delegate (Player bot) { bot.Move(Direction.Right); }, "moveRight");
+        new UndoCommand();
 
 
     public static MovementCommand HandleInputt()
@@ -51,10 +51,10 @@ public static class InputHandler
         {
             return MoveLeft;
         }
-        //else if (Input.GetKeyDown(KeyCode.F))
-        //{
-        //    return Shoot;
-        //}
+        else if (Input.GetKeyDown(KeyCode.Z))
+        {
+            return MoveUndo;
+        }
 
         return null;
     }
