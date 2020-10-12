@@ -22,29 +22,14 @@ public class Board : MonoBehaviour
 
     public Coord[,] coordsArray;
 
-    //public Vector3[,] canvasLocations;
-
+    
     public Vector2[,] canvasLocations;
-
-    //private Coord emptyCoord;
-
-    // inicio final, [0], [length-1]
     public List<Coord> wayToWalk;
-
-
-
-    private Vector3 lienzoDims; //joo xq no salia en debug? porque era public? wtf?
-
-    private Vector3 initCoordPos;
-
-    private int tries = 0;
 
 
     public Player player;
     public Transform goal;
     public Transform obstacle;
-
-
 
     public Material matStone;
     public Material matWay;
@@ -54,7 +39,6 @@ public class Board : MonoBehaviour
 
     public static ConfigJSON configData;
 
-    
     
 
     // Inicialization of Config Data
@@ -90,48 +74,15 @@ public class Board : MonoBehaviour
 
         range = lengthW * lengthH;
 
-        //lienzoDims = getLienzo();
-
-        //coords = new Coord[lengthW * lengthH];
-
-        //coordsArray = new Coord[lengthW, lengthH];
-
         //Guardar las posiciones en 3D world
         canvasLocations = new Vector2[lengthW, lengthH];
 
+        GetComponent<GridLayoutGroup>().constraintCount = lengthW;
+        ToolboxStaticData.SetObstacled(false);
+
+        //GenerateLabyrinth();
 
 
-        //width = lienzoDims.x / sizeX;
-        //height = lienzoDims.y / lengthH;
-
-
-        //initCoordPos = lienzo.transform.position - new Vector3(lienzoDims.x / 2, lienzoDims.y / 2, lienzo.transform.position.z)
-        //                                            + new Vector3(width / 2, height / 2, coordPrefab.transform.position.z);
-        //   // coordPrefab.transform.position;
-
-        //Vector3 canvasPos = initCoordPos;
-        //for (int s = 0; s < sizeX; s++)
-        //{
-        //    for (int t = 0; t < lengthH; t++)
-        //    {
-        //        canvasLocations[s, t] = canvasPos;
-
-        //        canvasPos.x = canvasPos.x + width + spaceBetwCoord;
-
-        //    }
-
-        //    canvasPos.y = canvasPos.y + height + spaceBetwCoord;
-        //    canvasPos.x = initCoordPos.x;
-        //}
-
-        //PopulatePuzzle();
-
-        GenerateLabyrinth();
-
-        //ponga el player en la primera celda del way
-
-
-       
 
     }
 
@@ -189,26 +140,21 @@ public class Board : MonoBehaviour
     public void UpdatePlayerPos(Vector2 location)
     {
 
-
+        //ToDo try catch IndexOutOfRangeException
         Vector2 newPos = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
 
-        //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)location.x, (int)location.y] + new Vector2(-200, 200);
+        
 
         //Animate
         StartCoroutine("AnimPosition", newPos);
 
 
-        player.pos = location; //esto pa que?
+        
     }
 
-    void GenerateLabyrinth()
+    public void GenerateLabyrinth()
     {
         Coord newCoord;
-
-        int fichaImg = 1;
-
-        //coordPrefab.transform.localScale = new Vector3(lienzoDims.x / sizeX / 10f, 0.2f, lienzoDims.y / lengthH / 10f);
-
 
 
         for (int i = 0; i < lengthW * lengthW; i++)
@@ -226,7 +172,6 @@ public class Board : MonoBehaviour
             newCoord.pos = new Vector2(x, y);
 
 
-            //
             if (wayToWalk.Contains(newCoord))
             {
                 Debug.Log("se le encontro desde el json" + newCoord.pos);
@@ -236,7 +181,6 @@ public class Board : MonoBehaviour
                 newCoord.isEmpty = true;
                 //wayToWalk.Add(newCoord);
             }
-
 
             //foreach (Coord c in wayToWalk)
             //{
@@ -258,7 +202,7 @@ public class Board : MonoBehaviour
             //});
 
 
-            //ToDevelop: way from Resources file or generated random
+            //ToDevelop: way from Resources file or generated random DONE
             //if (y == 2)
             //{
             //    newCoord.isEmpty = true;
@@ -287,7 +231,6 @@ public class Board : MonoBehaviour
                 ToolboxStaticData.SetObstaclePosition(obsC);
             }
             
-
             coords.Add(newCoord);
             ToolboxStaticData.SetCoordsWay(wayToWalk);
 
@@ -317,6 +260,7 @@ public class Board : MonoBehaviour
         //player.transform.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)wayToWalk[0].pos.x, (int)wayToWalk[0].pos.y] + new Vector2(-200, 200);
 
         UpdatePlayerPos(wayToWalk[0].pos);
+        player.pos = wayToWalk[0].pos; 
 
         goal.GetComponent<RectTransform>().anchoredPosition = canvasLocations[(int)wayToWalk[wayToWalk.Count - 1].pos.x, 
                                                                                 (int)wayToWalk[wayToWalk.Count - 1].pos.y]
@@ -327,62 +271,7 @@ public class Board : MonoBehaviour
                                                             + new Vector2(-200, 200);
     }
 
-    //Genera el puzzle y asigna las variables de las coords
-    void PopulatePuzzle()
-    {
-
-        //Coord newCoord;
-
-        //int fichaImg = 1;
-
-        //coordPrefab.transform.localScale = new Vector3(lienzoDims.x / lengthW / 10f, 0.2f, lienzoDims.y / lengthH / 10f);
-
-
-        //for (int i = 0; i < sizeX; i++)
-        //{
-        //    for (int j = 0; j < lengthH; j++)
-        //    {
-        //        GameObject go = Instantiate(fichaPrefab, canvasLocations[i, j], Quaternion.Euler(-90, 0, 0), this.transform) as GameObject;
-
-
-        //        newCoord = go.GetComponent<Coord>();
-        //        newCoord.finalPos = new Vector2(i, j);
-        //        newCoord.pos = new Vector2(i, j);
-        //        go.GetComponentInChildren<TextMesh>().text = fichaImg + "";
-
-        //        if (i == sizeX - 1 && j == lengthH - 1)
-        //        {
-        //            newCoord.SetAsEmpty(true);
-        //            newCoord.GetComponentInChildren<TextMesh>().text = " ";
-        //            emptyCoord = newCoord;
-        //            newCoord.gameObject.name = "Vacio";
-        //            newCoord.GetComponent<Renderer>().enabled = false;
-        //        }
-        //        //si no específica una asignacion en un prefab, lo aplica a todos
-        //        else
-        //        {
-        //            newCoord.SetAsEmpty(false);
-        //            newCoord.GetComponentInChildren<TextMesh>().text = fichaImg + "";
-        //        }
-
-
-        //        fichas[fichaImg - 1] = newCoord;
-        //        fichasArray[i, j] = newCoord;
-
-        //        newCoord.puzzleInfo = this;
-
-        //        fichaImg++;
-
-        //    }
-        //}
-    }
-
-    void MoveToEmptySpace(Vector2 f)
-    {
-
-
-    }
-
+   
 
     public List<Coord> GetCoordsWay()
     {
@@ -399,7 +288,6 @@ public class Board : MonoBehaviour
         return wayToWalk[wayToWalk.Count - 1];
     }
 
-
 }
 
 // Clase de Configuración vista en el editor de Unity en el Script Json Config
@@ -410,7 +298,7 @@ public class ConfigJSON
 
     public int mazeW;
     public int mazeH;
-
+    public int memorizeSecs;
     public float[] defaultXYZOrientationRange;
     public int[] wayCoordsX;
     public int[] wayCoordsY;

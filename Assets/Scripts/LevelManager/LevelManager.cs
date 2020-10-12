@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*Damayor - based on one of my projects used years ago*/
 public class LevelManager : Singleton<LevelManager>
 {
 
@@ -14,6 +15,8 @@ public class LevelManager : Singleton<LevelManager>
 
     public event Action OnWin;
     public event Action OnLose;
+
+    public int level;
 
     
 
@@ -51,7 +54,9 @@ public class LevelManager : Singleton<LevelManager>
             instaceType = "Instancia Original";
             awaked = true;
 
-        }
+            //ToDo change level
+            level ++;
+}
     }
 
     // Start is called before the first frame update
@@ -87,8 +92,6 @@ public class LevelManager : Singleton<LevelManager>
         //if (OnWin != null)
         //    OnWin();
     }
-
-
 
 
 }

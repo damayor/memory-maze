@@ -6,8 +6,8 @@ using UnityEngine;
 public static class ToolboxStaticData 
 {
 
-    public static int rangeXMaze = 4;
-    public static int rangeYMaze = 4;
+    public static int rangeXMaze ;
+    public static int rangeYMaze ;
 
     public static int memorizeTime = 6;
 

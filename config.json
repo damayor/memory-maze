@@ -2,10 +2,8 @@
   "Name": "Config",
   "mazeW": 4,
   "mazeH": 4,
-  "defaultXYZOrientationRange": [ -50, 40, -5, 24, -40, 30 ],
-  
-  "wayCoordsX": [ 0, 1, 2, 2 ],
-  "wayCoordsY": [ 2, 2 ,2, 3 ],
-
+  "memorizeSecs": 6,
+  "wayCoordsX": [ 0, 1, 1, 1, 2, 3, 3, 3, 3 ],
+  "wayCoordsY": [ 1, 1, 2, 3, 3, 3, 2, 1, 0 ],
   "indexObstacle": 2
 }
